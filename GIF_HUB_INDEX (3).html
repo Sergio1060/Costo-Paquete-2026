@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GIF Hub — Index Cross | Quick</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#1F3864;--accent:#4472C4;--orange:#C55A11;--orange-light:#F4A261;
+    --bg:#0d1b2e;--surface:#152238;--surface2:#1c2f4a;--border:rgba(68,114,196,0.25);
+    --text:#e8edf5;--text2:#8fa3c0;--text3:#5a7a9e;
+    --green:#27ae60;--red:#e74c3c;--amber:#f39c12;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;min-height:100vh}
+  
+  /* HEADER */
+  .header{background:var(--navy);border-bottom:2px solid var(--orange);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px}
+  .header-left{display:flex;align-items:center;gap:12px}
+  .logo{font-size:20px;font-weight:700;color:#fff;letter-spacing:1px}
+  .logo span{color:var(--orange)}
+  .badge{background:var(--orange);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:1px}
+  .header-right{display:flex;align-items:center;gap:12px}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .last-update{font-size:11px;color:var(--text2)}
+
+  /* TOOLBAR */
+  .toolbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .toolbar select, .toolbar input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-size:12px;outline:none;cursor:pointer}
+  .toolbar select:hover,.toolbar input:hover{border-color:var(--accent)}
+  .toolbar label{font-size:11px;color:var(--text2);margin-right:2px}
+  .btn{background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .btn:hover{background:#5583d5}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+  .btn-outline:hover{border-color:var(--accent);color:var(--text)}
+  .divider{width:1px;height:24px;background:var(--border)}
+  .filter-count{font-size:11px;color:var(--text2);white-space:nowrap}
+
+  /* MAIN */
+  .main{padding:20px 24px}
+
+  /* KPI CARDS */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden}
+  .kpi::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent)}
+  .kpi.orange::before{background:var(--orange)}
+  .kpi.green::before{background:var(--green)}
+  .kpi.red::before{background:var(--red)}
+  .kpi.amber::before{background:var(--amber)}
+  .kpi-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+  .kpi-val{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+  .kpi-sub{font-size:10px;color:var(--text2);margin-top:4px}
+  .kpi-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:28px;color:var(--accent);opacity:.15}
+  .kpi.orange .kpi-icon{color:var(--orange)}
+  .kpi.green .kpi-icon{color:var(--green)}
+
+  /* CHARTS ROW */
+  .charts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px}
+  @media(max-width:900px){.charts-row{grid-template-columns:1fr 1fr}}
+  @media(max-width:600px){.charts-row{grid-template-columns:1fr}}
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .chart-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+  /* TABLE */
+  .table-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .table-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+  .table-title{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+  .table-scroll{overflow-x:auto;max-height:480px;overflow-y:auto}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  thead th{background:var(--surface2);color:var(--text2);font-weight:600;padding:8px 12px;text-align:left;white-space:nowrap;position:sticky;top:0;z-index:1;font-size:10px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;user-select:none}
+  thead th:hover{color:var(--accent)}
+  thead th.sorted{color:var(--accent)}
+  tbody tr{border-bottom:1px solid rgba(68,114,196,.1)}
+  tbody tr:hover{background:rgba(68,114,196,.07)}
+  tbody td{padding:7px 12px;color:var(--text);white-space:nowrap}
+  .badge-estado{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+  .badge-finalizado{background:rgba(39,174,96,.15);color:#27ae60}
+  .badge-cancelado{background:rgba(231,76,60,.15);color:#e74c3c}
+  .badge-proceso{background:rgba(243,156,18,.15);color:#f39c12}
+
+  /* LOADING */
+  .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;gap:16px;color:var(--text2)}
+  .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ERROR */
+  .error-msg{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.3);border-radius:8px;padding:16px;color:#e74c3c;font-size:13px;margin-bottom:16px}
+  
+  /* INDEX PANEL */
+  .index-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  @media(max-width:700px){.index-row{grid-template-columns:1fr}}
+  .index-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .index-card-header{background:var(--surface2);padding:10px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border)}
+  .index-list{padding:8px 0}
+  .index-item{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;cursor:pointer;transition:background .15s}
+  .index-item:hover{background:rgba(68,114,196,.08)}
+  .index-item.selected{background:rgba(68,114,196,.15)}
+  .index-name{font-size:12px;color:var(--text)}
+  .index-bar-wrap{flex:1;margin:0 12px;height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+  .index-bar{height:100%;border-radius:2px;background:var(--accent)}
+  .index-bar.orange{background:var(--orange)}
+  .index-val{font-size:11px;font-weight:700;color:var(--text2);min-width:70px;text-align:right}
+  .index-count{font-size:10px;color:var(--text3)}
+
+  /* SECTION LABEL */
+  .section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+  .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  /* WORKER EARNINGS TABLE */
+  .worker-table{width:100%;border-collapse:collapse;font-size:12px}
+  .worker-table thead th{background:var(--surface2);color:var(--text2);font-weight:600;padding:7px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;position:sticky;top:0;z-index:1;white-space:nowrap}
+  .worker-table thead th:hover{color:var(--accent)}
+  .worker-table thead th.sorted-w{color:var(--orange)}
+  .worker-table tbody tr{border-bottom:1px solid rgba(68,114,196,.1)}
+  .worker-table tbody tr:hover{background:rgba(68,114,196,.07)}
+  .worker-table tbody td{padding:6px 12px;color:var(--text)}
+  .worker-rank{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:700;background:rgba(68,114,196,.15);color:var(--accent)}
+  .worker-rank.top3{background:rgba(197,90,17,.2);color:var(--orange)}
+  .ganancia-bar{display:flex;align-items:center;gap:6px}
+  .ganancia-bar-inner{height:6px;border-radius:3px;background:var(--green);min-width:2px}
+  .search-worker{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:5px 10px;border-radius:6px;font-size:12px;outline:none;width:220px}
+  .search-worker:hover,.search-worker:focus{border-color:var(--accent)}
+
+  /* PAGINATION */
+  .pagination{display:flex;align-items:center;gap:8px;padding:10px 16px;justify-content:space-between;border-top:1px solid var(--border)}
+  .pagination-info{font-size:11px;color:var(--text2)}
+  .pagination-btns{display:flex;gap:4px}
+  .page-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:4px;font-size:11px;cursor:pointer}
+  .page-btn:hover{border-color:var(--accent);color:var(--text)}
+  .page-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .page-btn:disabled{opacity:.3;cursor:default}
+
+  /* PILL TABS */
+  .tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+  .tab{padding:5px 12px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border);color:var(--text2)}
+  .tab:hover{border-color:var(--accent);color:var(--text)}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">Quick<span>.</span>GIF</div>
+    <div class="badge">HUB INDEX</div>
+    <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:4px">Cross Operations</span>
+  </div>
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <div class="last-update" id="lastUpdate">Cargando datos...</div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <label>Ciudad</label>
+  <select id="filterCiudad"><option value="">Todas</option></select>
+  <label>Cliente</label>
+  <select id="filterCliente"><option value="">Todos</option></select>
+  <label>Estado</label>
+  <select id="filterEstado"><option value="">Todos</option></select>
+  <label>Tipo Servicio</label>
+  <select id="filterTipo"><option value="">Todos</option></select>
+  <label>Mes</label>
+  <select id="filterMes"><option value="">Todos</option></select>
+  <div class="divider"></div>
+  <input type="text" id="searchInput" placeholder="🔍  Buscar orden, trabajador, placa..." style="width:220px">
+  <div class="divider"></div>
+  <button class="btn" onclick="applyFilters()"><i class="ti ti-filter"></i> Aplicar</button>
+  <button class="btn btn-outline" onclick="clearFilters()"><i class="ti ti-x"></i> Limpiar</button>
+  <div class="divider"></div>
+  <button class="btn btn-outline" onclick="exportCSV()"><i class="ti ti-download"></i> Exportar</button>
+  <div class="divider"></div>
+  <span class="filter-count" id="filterCount">Cargando...</span>
+</div>
+
+<div class="main">
+  <div id="loadingArea" class="loading">
+    <div class="spinner"></div>
+    <div>Conectando con Google Sheets...</div>
+  </div>
+  <div id="errorArea" style="display:none"></div>
+  <div id="dashContent" style="display:none">
+
+    <!-- KPIs -->
+    <div class="section-label"><i class="ti ti-layout-dashboard"></i> Indicadores clave</div>
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi"><div class="kpi-label">Total Servicios</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub" id="kpiTotalSub"></div><i class="ti ti-package kpi-icon"></i></div>
+      <div class="kpi orange"><div class="kpi-label">Ingresos Totales</div><div class="kpi-val" id="kpiIngresos">—</div><div class="kpi-sub" id="kpiIngresosSub"></div><i class="ti ti-cash kpi-icon"></i></div>
+      <div class="kpi green"><div class="kpi-label">Ganancia Neta</div><div class="kpi-val" id="kpiGanancia">—</div><div class="kpi-sub" id="kpiGananciaSub"></div><i class="ti ti-trending-up kpi-icon"></i></div>
+      <div class="kpi amber"><div class="kpi-label">Costo Operativo</div><div class="kpi-val" id="kpiCosto">—</div><div class="kpi-sub"></div><i class="ti ti-coins kpi-icon"></i></div>
+      <div class="kpi"><div class="kpi-label">Ciudades</div><div class="kpi-val" id="kpiCiudades">—</div><div class="kpi-sub">activas</div><i class="ti ti-map-pin kpi-icon"></i></div>
+      <div class="kpi"><div class="kpi-label">Trabajadores</div><div class="kpi-val" id="kpiWorkers">—</div><div class="kpi-sub">únicos activos</div><i class="ti ti-user kpi-icon"></i></div>
+      <div class="kpi red"><div class="kpi-label">Cancelaciones</div><div class="kpi-val" id="kpiCancelados">—</div><div class="kpi-sub" id="kpiCanceladosSub"></div><i class="ti ti-alert-triangle kpi-icon"></i></div>
+      <div class="kpi"><div class="kpi-label">Ticket Promedio</div><div class="kpi-val" id="kpiTicket">—</div><div class="kpi-sub">por servicio</div><i class="ti ti-receipt kpi-icon"></i></div>
+    </div>
+
+    <!-- INDEX PANELS -->
+    <div class="section-label" style="margin-top:4px"><i class="ti ti-list-check"></i> Index por dimensión</div>
+    <div class="index-row">
+      <div class="index-card">
+        <div class="index-card-header"><i class="ti ti-map-pin"></i> Ciudad — Ingresos</div>
+        <div class="index-list" id="indexCiudad"></div>
+      </div>
+      <div class="index-card">
+        <div class="index-card-header"><i class="ti ti-building-store"></i> Cliente — Servicios</div>
+        <div class="index-list" id="indexCliente"></div>
+      </div>
+    </div>
+    <div class="index-row">
+      <div class="index-card">
+        <div class="index-card-header"><i class="ti ti-user-check"></i> Trabajador (Quicker) — Servicios</div>
+        <div class="index-list" id="indexTrabajador"></div>
+      </div>
+      <div class="index-card">
+        <div class="index-card-header"><i class="ti ti-layout-grid"></i> Centro de Costos — Ingresos</div>
+        <div class="index-list" id="indexCentro"></div>
+      </div>
+    </div>
+    <div class="index-row">
+      <div class="index-card">
+        <div class="index-card-header"><i class="ti ti-car"></i> Placa — Servicios</div>
+        <div class="index-list" id="indexPlaca"></div>
+      </div>
+      <div class="index-card">
+        <div class="index-card-header"><i class="ti ti-package"></i> Tipo de Servicio — Distribución</div>
+        <div class="index-list" id="indexTipo"></div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="section-label" style="margin-top:4px"><i class="ti ti-chart-bar"></i> Gráficos</div>
+    <div class="charts-row" style="grid-template-columns:1fr 1fr 1fr 1fr">
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-bar"></i> Servicios por ciudad</div>
+        <div style="position:relative;height:220px"><canvas id="chartCiudad" role="img" aria-label="Servicios por ciudad"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-donut"></i> Distribución por estado</div>
+        <div style="position:relative;height:220px"><canvas id="chartEstado" role="img" aria-label="Distribución por estado"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-donut-2"></i> Tipo de servicio</div>
+        <div style="position:relative;height:220px"><canvas id="chartTipo" role="img" aria-label="Distribución por tipo de servicio"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><i class="ti ti-chart-bar"></i> Ingresos por cliente</div>
+        <div style="position:relative;height:220px"><canvas id="chartCliente" role="img" aria-label="Ingresos por cliente"></canvas></div>
+      </div>
+    </div>
+
+    <!-- WORKER EARNINGS -->
+    <div class="section-label" style="margin-top:4px"><i class="ti ti-wallet"></i> Ganancia por Trabajador (Quicker)</div>
+    <div class="table-card" style="margin-bottom:20px">
+      <div class="table-header">
+        <div class="table-title"><i class="ti ti-user-dollar"></i> Ranking de ganancias <span id="workerCountBadge" style="background:rgba(197,90,17,.2);color:var(--orange);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;margin-left:4px"></span></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input class="search-worker" type="text" id="searchWorker" placeholder="🔍 Buscar trabajador...">
+          <button class="btn btn-outline" style="font-size:11px" onclick="exportWorkerCSV()"><i class="ti ti-download"></i> Exportar</button>
+        </div>
+      </div>
+      <div class="table-scroll" style="max-height:400px">
+        <table class="worker-table">
+          <thead>
+            <tr>
+              <th style="width:36px">#</th>
+              <th onclick="sortWorker('nombre')">Trabajador <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortWorker('ciudad')">Ciudad principal <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortWorker('servicios')" style="text-align:right">Servicios <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortWorker('ganancia')" style="text-align:right">Ganancia Total <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortWorker('promedio')" style="text-align:right">Prom. / Servicio <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortWorker('precio')" style="text-align:right">Ingreso Bruto <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th>Distribución</th>
+              <th onclick="sortWorker('margen')" style="text-align:right">Margen % <i class="ti ti-selector" style="font-size:10px"></i></th>
+            </tr>
+          </thead>
+          <tbody id="workerTableBody"></tbody>
+          <tfoot id="workerTableFoot">
+            <tr style="background:var(--surface2);border-top:2px solid var(--orange);font-weight:700">
+              <td colspan="2" style="padding:8px 12px;font-size:11px;color:var(--orange);text-transform:uppercase;letter-spacing:.5px"><i class="ti ti-sum" style="font-size:13px;vertical-align:-2px"></i> TOTAL TRABAJADORES FILTRADOS</td>
+              <td style="padding:8px 12px;text-align:left;font-size:11px;color:var(--text2)" id="footCiudades">—</td>
+              <td style="padding:8px 12px;text-align:right;color:var(--text)" id="footServicios">—</td>
+              <td style="padding:8px 12px;text-align:right;color:var(--green);font-size:14px" id="footGanancia">—</td>
+              <td style="padding:8px 12px;text-align:right;color:var(--text2)" id="footPromedio">—</td>
+              <td style="padding:8px 12px;text-align:right;color:var(--text3)" id="footPrecio">—</td>
+              <td></td>
+              <td style="padding:8px 12px;text-align:right;color:var(--amber)" id="footMargen">—</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="pagination" id="workerPagination">
+        <div class="pagination-info" id="workerPaginationInfo"></div>
+        <div class="pagination-btns" id="workerPaginationBtns"></div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="section-label"><i class="ti ti-table"></i> Detalle de guías</div>
+    <div class="tabs" id="viewTabs">
+      <div class="tab active" onclick="setView('all',this)">Todos</div>
+      <div class="tab" onclick="setView('finalizado',this)">Finalizados</div>
+      <div class="tab" onclick="setView('cancelado',this)">Cancelados</div>
+    </div>
+    <div class="table-card">
+      <div class="table-header">
+        <div class="table-title"><i class="ti ti-database"></i> Registros filtrados <span id="tableCountBadge" style="background:rgba(68,114,196,.2);color:var(--accent);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;margin-left:4px"></span></div>
+        <div style="font-size:11px;color:var(--text3)" id="pageInfo"></div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortTable('ID_SERVICIO')">ID <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('FECHA')">Fecha <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('CIUDAD')">Ciudad <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('CLIENTE')">Cliente <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('TRABAJADOR')">Trabajador <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('PLACA')">Placa <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('CENTRO_COSTOS')">C. Costos <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('TIPO_SERVICIO')">Tipo <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('ESTADO')">Estado <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('PRECIO_TOTAL')" style="text-align:right">Precio <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th onclick="sortTable('GANANCIAS')" style="text-align:right">Ganancia <i class="ti ti-selector" style="font-size:10px"></i></th>
+              <th>Orden</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div class="pagination-info" id="paginationInfo"></div>
+        <div class="pagination-btns" id="paginationBtns"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Bsyd3HyHiTXU24Q7Dxq9reBj45lZReAu9RktXZa-9pV-ittY4PmNvfI5AaonKPZ6_IGMZGchLIEc/pub?output=csv';
+
+let allData = [];
+let filteredData = [];
+let currentPage = 1;
+const PAGE_SIZE = 100;
+let sortCol = 'FECHA';
+let sortDir = -1;
+let viewFilter = 'all';
+let charts = {};
+
+async function loadData() {
+  try {
+    const res = await fetch(CSV_URL);
+    if (!res.ok) throw new Error('Error ' + res.status);
+    const text = await res.text();
+    allData = parseCSV(text);
+    document.getElementById('lastUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-CO');
+    init();
+  } catch(e) {
+    document.getElementById('loadingArea').style.display = 'none';
+    document.getElementById('errorArea').style.display = 'block';
+    document.getElementById('errorArea').innerHTML = '<div class="error-msg"><i class="ti ti-alert-circle"></i> No se pudo cargar el archivo. Verifica que el Google Sheet esté publicado públicamente.<br><small>' + e.message + '</small></div>';
+  }
+}
+
+function parseCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  if (!lines.length) return [];
+  const headers = parseCSVLine(lines[0]);
+  return lines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
+    return obj;
+  });
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQuotes = !inQuotes; continue; }
+    if (line[i] === ',' && !inQuotes) { result.push(current); current = ''; continue; }
+    current += line[i];
+  }
+  result.push(current);
+  return result;
+}
+
+function init() {
+  populateFilters();
+  applyFilters();
+  document.getElementById('loadingArea').style.display = 'none';
+  document.getElementById('dashContent').style.display = 'block';
+}
+
+function populateFilters() {
+  const ciudades = [...new Set(allData.map(r => r.CIUDAD).filter(Boolean))].sort();
+  const clientes = [...new Set(allData.map(r => r.CLIENTE).filter(Boolean))].sort();
+  const estados  = [...new Set(allData.map(r => r.ESTADO).filter(Boolean))].sort();
+  const tipos    = [...new Set(allData.map(r => r.TIPO_SERVICIO).filter(Boolean))].sort();
+  const meses    = [...new Set(allData.map(r => r.MES || r.FECHA?.slice(0,7)).filter(Boolean))].sort();
+
+  fillSelect('filterCiudad', ciudades);
+  fillSelect('filterCliente', clientes);
+  fillSelect('filterEstado', estados);
+  fillSelect('filterTipo', tipos);
+  fillSelect('filterMes', meses);
+}
+
+function fillSelect(id, items) {
+  const el = document.getElementById(id);
+  const cur = el.value;
+  while (el.options.length > 1) el.remove(1);
+  items.forEach(v => {
+    const o = document.createElement('option');
+    o.value = o.textContent = v;
+    el.appendChild(o);
+  });
+  if (cur) el.value = cur;
+}
+
+function applyFilters() {
+  const ciudad = document.getElementById('filterCiudad').value;
+  const cliente = document.getElementById('filterCliente').value;
+  const estado  = document.getElementById('filterEstado').value;
+  const tipo    = document.getElementById('filterTipo').value;
+  const mes     = document.getElementById('filterMes').value;
+  const search  = document.getElementById('searchInput').value.toLowerCase();
+
+  filteredData = allData.filter(r => {
+    if (ciudad  && r.CIUDAD        !== ciudad)  return false;
+    if (cliente && r.CLIENTE       !== cliente) return false;
+    if (estado  && r.ESTADO        !== estado)  return false;
+    if (tipo    && r.TIPO_SERVICIO !== tipo)     return false;
+    if (mes     && (r.MES || r.FECHA?.slice(0,7)) !== mes) return false;
+    if (viewFilter !== 'all') {
+      if (viewFilter === 'finalizado' && !r.ESTADO?.toLowerCase().includes('finaliz')) return false;
+      if (viewFilter === 'cancelado'  && !r.ESTADO?.toLowerCase().includes('cancel'))  return false;
+    }
+    if (search) {
+      const haystack = [r.ID_SERVICIO, r.NUMERO_ORDEN, r.TRABAJADOR, r.PLACA, r.CLIENTE, r.REMESA, r.MANIFIESTO].join(' ').toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('filterCount').textContent = filteredData.length.toLocaleString('es-CO') + ' registros';
+  currentPage = 1;
+  workerPage = 1;
+  updateKPIs();
+  updateIndexPanels();
+  updateCharts();
+  workerData = buildWorkerData();
+  workerFiltered = [...workerData];
+  document.getElementById('searchWorker').value = '';
+  renderWorkerTable();
+  renderTable();
+}
+
+function clearFilters() {
+  ['filterCiudad','filterCliente','filterEstado','filterTipo','filterMes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('searchInput').value = '';
+  viewFilter = 'all';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.tab').classList.add('active');
+  applyFilters();
+}
+
+function setView(v, el) {
+  viewFilter = v;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function num(v) { return parseFloat(v) || 0; }
+
+function fmt(n) { return Math.round(n).toLocaleString('es-CO'); }
+
+function fmtCOP(n) {
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return '$' + (n/1e3).toFixed(0) + 'K';
+  return '$' + fmt(n);
+}
+
+function updateKPIs() {
+  const total = filteredData.length;
+  const ingresos = filteredData.reduce((s,r) => s + num(r.PRECIO_TOTAL), 0);
+  const ganancia = filteredData.reduce((s,r) => s + num(r.GANANCIAS), 0);
+  const costo = ingresos - ganancia;
+  const cancelados = filteredData.filter(r => r.ESTADO?.toLowerCase().includes('cancel')).length;
+  const ciudadesActivas = new Set(filteredData.map(r => r.CIUDAD).filter(Boolean)).size;
+  const trabajadores = new Set(filteredData.map(r => r.TRABAJADOR).filter(Boolean)).size;
+
+  document.getElementById('kpiTotal').textContent = fmt(total);
+  document.getElementById('kpiTotalSub').textContent = 'de ' + fmt(allData.length) + ' totales';
+  document.getElementById('kpiIngresos').textContent = fmtCOP(ingresos);
+  document.getElementById('kpiIngresosSub').textContent = 'prom. ' + fmtCOP(total ? ingresos/total : 0);
+  document.getElementById('kpiGanancia').textContent = fmtCOP(ganancia);
+  document.getElementById('kpiGananciaSub').textContent = ingresos ? (ganancia/ingresos*100).toFixed(1) + '% margen' : '';
+  document.getElementById('kpiCosto').textContent = fmtCOP(costo);
+  document.getElementById('kpiCiudades').textContent = ciudadesActivas;
+  document.getElementById('kpiWorkers').textContent = fmt(trabajadores);
+  document.getElementById('kpiCancelados').textContent = fmt(cancelados);
+  document.getElementById('kpiCanceladosSub').textContent = total ? (cancelados/total*100).toFixed(1) + '% del total' : '';
+  document.getElementById('kpiTicket').textContent = fmtCOP(total ? ingresos/total : 0);
+}
+
+function groupBy(arr, key, valKey, topN) {
+  const map = {};
+  arr.forEach(r => {
+    const k = r[key] || '(sin datos)';
+    if (!map[k]) map[k] = {count:0, value:0};
+    map[k].count++;
+    map[k].value += num(r[valKey || 'PRECIO_TOTAL']);
+  });
+  return Object.entries(map).sort((a,b) => b[1][valKey?'value':'count'] - a[1][valKey?'value':'count']).slice(0, topN||15);
+}
+
+function updateIndexPanels() {
+  renderIndex('indexCiudad', groupBy(filteredData,'CIUDAD','PRECIO_TOTAL',15), true, 'orange');
+  renderIndex('indexCliente', groupBy(filteredData,'CLIENTE',null,15), false);
+  renderIndex('indexTrabajador', groupBy(filteredData,'TRABAJADOR',null,20), false);
+  renderIndex('indexCentro', groupBy(filteredData,'CENTRO_COSTOS','PRECIO_TOTAL',15), true, 'orange');
+  renderIndex('indexPlaca', groupBy(filteredData,'PLACA',null,15), false);
+  renderIndex('indexTipo', groupBy(filteredData,'TIPO_SERVICIO',null,10), false);
+}
+
+function renderIndex(containerId, data, showValue, barClass) {
+  const container = document.getElementById(containerId);
+  if (!data.length) { container.innerHTML = '<div style="padding:16px;color:var(--text3);font-size:12px">Sin datos</div>'; return; }
+  const maxVal = Math.max(...data.map(d => showValue ? d[1].value : d[1].count));
+  container.innerHTML = data.map(([name, stats]) => {
+    const barVal = showValue ? stats.value : stats.count;
+    const pct = maxVal ? (barVal / maxVal * 100).toFixed(1) : 0;
+    const displayVal = showValue ? fmtCOP(stats.value) : fmt(stats.count) + ' serv.';
+    const displaySub = showValue ? fmt(stats.count) + ' serv.' : '';
+    return `<div class="index-item" onclick="quickFilter('${name}')">
+      <div class="index-name" style="max-width:130px;overflow:hidden;text-overflow:ellipsis" title="${name}">${name}</div>
+      <div class="index-bar-wrap"><div class="index-bar ${barClass||''}" style="width:${pct}%"></div></div>
+      <div class="index-val">${displayVal}${displaySub ? '<br><span class="index-count">'+displaySub+'</span>' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function quickFilter(val) {
+  const fields = ['filterCiudad','filterCliente'];
+  for (const fid of fields) {
+    const el = document.getElementById(fid);
+    const opts = Array.from(el.options).map(o => o.value);
+    if (opts.includes(val)) { el.value = val; applyFilters(); return; }
+  }
+}
+
+let chartCiudadInst, chartEstadoInst, chartTipoInst, chartClienteInst;
+
+function updateCharts() {
+  const ciudadData = groupBy(filteredData, 'CIUDAD', null, 10);
+  const estadoData = groupBy(filteredData, 'ESTADO', null, 5);
+  const clienteData = groupBy(filteredData, 'CLIENTE', 'PRECIO_TOTAL', 8);
+
+  if (chartCiudadInst) chartCiudadInst.destroy();
+  chartCiudadInst = new Chart(document.getElementById('chartCiudad'), {
+    type: 'bar',
+    data: {
+      labels: ciudadData.map(d => d[0]),
+      datasets: [{ label: 'Servicios', data: ciudadData.map(d => d[1].count), backgroundColor: '#4472C4', borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#8fa3c0', font: { size: 9 }, maxRotation: 45 }, grid: { color: 'rgba(68,114,196,.1)' } },
+        y: { ticks: { color: '#8fa3c0', font: { size: 10 } }, grid: { color: 'rgba(68,114,196,.1)' } }
+      }
+    }
+  });
+
+  if (chartEstadoInst) chartEstadoInst.destroy();
+  chartEstadoInst = new Chart(document.getElementById('chartEstado'), {
+    type: 'doughnut',
+    data: {
+      labels: estadoData.map(d => d[0]),
+      datasets: [{ data: estadoData.map(d => d[1].count), backgroundColor: ['#4472C4','#C55A11','#e74c3c','#f39c12','#27ae60'], borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { color: '#8fa3c0', font: { size: 10 }, padding: 8, boxWidth: 10 } } }
+    }
+  });
+
+  const tipoData = groupBy(filteredData, 'TIPO_SERVICIO', null, 8);
+  const tipoColors = ['#4472C4','#C55A11','#27ae60','#f39c12','#9b59b6','#e74c3c','#1abc9c','#e67e22'];
+  if (chartTipoInst) chartTipoInst.destroy();
+  chartTipoInst = new Chart(document.getElementById('chartTipo'), {
+    type: 'doughnut',
+    data: {
+      labels: tipoData.map(d => d[0]),
+      datasets: [{ data: tipoData.map(d => d[1].count), backgroundColor: tipoColors.slice(0, tipoData.length), borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#8fa3c0', font: { size: 9 }, padding: 6, boxWidth: 10 } },
+        tooltip: { callbacks: { label: ctx => {
+          const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+          const pct = total ? (ctx.parsed / total * 100).toFixed(1) : 0;
+          return ' ' + fmt(ctx.parsed) + ' (' + pct + '%)';
+        }}}
+      }
+    }
+  });
+
+  if (chartClienteInst) chartClienteInst.destroy();
+  chartClienteInst = new Chart(document.getElementById('chartCliente'), {
+    type: 'bar',
+    data: {
+      labels: clienteData.map(d => d[0].replace('Cross ','').replace('CROSS ','')),
+      datasets: [{ label: 'Ingresos COP', data: clienteData.map(d => d[1].value), backgroundColor: '#C55A11', borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' $' + fmt(ctx.parsed.y) } } },
+      scales: {
+        x: { ticks: { color: '#8fa3c0', font: { size: 9 }, maxRotation: 45 }, grid: { color: 'rgba(68,114,196,.1)' } },
+        y: { ticks: { color: '#8fa3c0', font: { size: 9 }, callback: v => fmtCOP(v) }, grid: { color: 'rgba(68,114,196,.1)' } }
+      }
+    }
+  });
+}
+
+function sortTable(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() {
+  const sorted = [...filteredData].sort((a,b) => {
+    const av = a[sortCol] || '';
+    const bv = b[sortCol] || '';
+    const an = parseFloat(av);
+    const bn = parseFloat(bv);
+    if (!isNaN(an) && !isNaN(bn)) return (an - bn) * sortDir;
+    return av.localeCompare(bv) * sortDir;
+  });
+
+  const total = sorted.length;
+  const pages = Math.ceil(total / PAGE_SIZE);
+  currentPage = Math.min(currentPage, pages || 1);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page = sorted.slice(start, start + PAGE_SIZE);
+
+  document.getElementById('tableCountBadge').textContent = fmt(total);
+  document.getElementById('paginationInfo').textContent = `Mostrando ${fmt(start+1)}–${fmt(Math.min(start+PAGE_SIZE,total))} de ${fmt(total)}`;
+
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = page.map(r => {
+    const estado = r.ESTADO || '';
+    let badgeClass = 'badge-proceso';
+    if (estado.toLowerCase().includes('finaliz')) badgeClass = 'badge-finalizado';
+    else if (estado.toLowerCase().includes('cancel')) badgeClass = 'badge-cancelado';
+    return `<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--accent)">${r.ID_SERVICIO||'—'}</td>
+      <td>${(r.FECHA||r.FECHA_SOLICITUD||'').slice(0,10)}</td>
+      <td>${r.CIUDAD||'—'}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis">${r.CLIENTE||'—'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${r.TRABAJADOR||'—'}</td>
+      <td><span style="font-family:monospace;background:rgba(68,114,196,.1);padding:1px 6px;border-radius:3px;font-size:10px">${r.PLACA||'—'}</span></td>
+      <td>${r.CENTRO_COSTOS||'—'}</td>
+      <td style="font-size:11px;color:var(--text2)">${r.TIPO_SERVICIO||'—'}</td>
+      <td><span class="badge-estado ${badgeClass}">${estado||'—'}</span></td>
+      <td style="text-align:right;font-family:monospace">$${fmt(num(r.PRECIO_TOTAL))}</td>
+      <td style="text-align:right;font-family:monospace;color:var(--green)">$${fmt(num(r.GANANCIAS))}</td>
+      <td style="font-size:10px;color:var(--text3)">${r.NUMERO_ORDEN||r.REMESA||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  renderPagination(pages);
+}
+
+function renderPagination(pages) {
+  const el = document.getElementById('paginationBtns');
+  let btns = '';
+  btns += `<button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  const range = [];
+  for (let i = Math.max(1, currentPage-2); i <= Math.min(pages, currentPage+2); i++) range.push(i);
+  if (range[0] > 1) { btns += `<button class="page-btn" onclick="goPage(1)">1</button>`; if(range[0]>2) btns += `<span style="color:var(--text3);padding:0 4px">…</span>`; }
+  range.forEach(p => btns += `<button class="page-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`);
+  if (range[range.length-1] < pages) { if(range[range.length-1]<pages-1) btns += `<span style="color:var(--text3);padding:0 4px">…</span>`; btns += `<button class="page-btn" onclick="goPage(${pages})">${pages}</button>`; }
+  btns += `<button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages||!pages?'disabled':''}>›</button>`;
+  el.innerHTML = btns;
+}
+
+function goPage(p) {
+  const pages = Math.ceil(filteredData.length / PAGE_SIZE);
+  if (p < 1 || p > pages) return;
+  currentPage = p;
+  renderTable();
+  document.querySelector('.table-card').scrollIntoView({behavior:'smooth'});
+}
+
+function exportCSV() {
+  if (!filteredData.length) return;
+  const headers = Object.keys(filteredData[0]);
+  const rows = [headers.join(','), ...filteredData.map(r => headers.map(h => '"' + (r[h]||'').replace(/"/g,'""') + '"').join(','))];
+  const blob = new Blob(['\ufeff' + rows.join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'GIF_HUB_Cross_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+document.getElementById('searchInput').addEventListener('keyup', e => { if(e.key==='Enter') applyFilters(); });
+
+let workerData = [];
+let workerFiltered = [];
+let workerPage = 1;
+const WORKER_PAGE_SIZE = 50;
+let workerSortCol = 'ganancia';
+let workerSortDir = -1;
+
+function buildWorkerData() {
+  const map = {};
+  filteredData.forEach(r => {
+    const nombre = (r.TRABAJADOR || r['Nombre Trabajador'] || '').trim();
+    if (!nombre) return;
+    if (!map[nombre]) map[nombre] = { nombre, servicios: 0, ganancia: 0, precio: 0, ciudades: {} };
+    map[nombre].servicios++;
+    map[nombre].ganancia += num(r.GANANCIAS);
+    map[nombre].precio += num(r.PRECIO_TOTAL);
+    const ciudad = r.CIUDAD || '';
+    if (ciudad) map[nombre].ciudades[ciudad] = (map[nombre].ciudades[ciudad] || 0) + 1;
+  });
+  return Object.values(map).map(w => ({
+    ...w,
+    promedio: w.servicios ? w.ganancia / w.servicios : 0,
+    margen: w.precio ? (w.ganancia / w.precio * 100) : 0,
+    ciudad: Object.entries(w.ciudades).sort((a,b) => b[1]-a[1])[0]?.[0] || '—'
+  }));
+}
+
+function sortWorker(col) {
+  if (workerSortCol === col) workerSortDir *= -1;
+  else { workerSortCol = col; workerSortDir = -1; }
+  workerPage = 1;
+  renderWorkerTable();
+}
+
+function renderWorkerTable() {
+  const search = (document.getElementById('searchWorker').value || '').toLowerCase();
+  workerFiltered = workerData.filter(w => !search || w.nombre.toLowerCase().includes(search));
+
+  const sorted = [...workerFiltered].sort((a, b) => {
+    const av = a[workerSortCol] ?? '';
+    const bv = b[workerSortCol] ?? '';
+    if (typeof av === 'number') return (av - bv) * workerSortDir;
+    return String(av).localeCompare(String(bv)) * workerSortDir;
+  });
+
+  const total = sorted.length;
+  const pages = Math.ceil(total / WORKER_PAGE_SIZE);
+  workerPage = Math.min(workerPage, pages || 1);
+  const start = (workerPage - 1) * WORKER_PAGE_SIZE;
+  const page = sorted.slice(start, start + WORKER_PAGE_SIZE);
+
+  const maxGanancia = sorted[0]?.ganancia || 1;
+
+  document.getElementById('workerCountBadge').textContent = fmt(total) + ' trabajadores';
+  document.getElementById('workerPaginationInfo').textContent = `Mostrando ${fmt(start+1)}–${fmt(Math.min(start+WORKER_PAGE_SIZE,total))} de ${fmt(total)}`;
+
+  // Totales del footer — sobre TODO workerFiltered, no solo la página visible
+  const totalServicios = workerFiltered.reduce((s,w) => s + w.servicios, 0);
+  const totalGanancia  = workerFiltered.reduce((s,w) => s + w.ganancia, 0);
+  const totalPrecio    = workerFiltered.reduce((s,w) => s + w.precio, 0);
+  const totalCiudades  = new Set(workerFiltered.map(w => w.ciudad).filter(c => c && c !== '—')).size;
+  const margenGlobal   = totalPrecio ? (totalGanancia / totalPrecio * 100) : 0;
+
+  document.getElementById('footCiudades').textContent = totalCiudades + ' ciudades';
+  document.getElementById('footServicios').textContent = fmt(totalServicios);
+  document.getElementById('footGanancia').textContent  = '$' + fmt(totalGanancia);
+  document.getElementById('footPromedio').textContent  = '$' + fmt(totalServicios ? totalGanancia / totalServicios : 0);
+  document.getElementById('footPrecio').textContent    = '$' + fmt(totalPrecio);
+  document.getElementById('footMargen').textContent    = margenGlobal.toFixed(1) + '%';
+
+  const tbody = document.getElementById('workerTableBody');
+  tbody.innerHTML = page.map((w, i) => {
+    const rank = start + i + 1;
+    const rankClass = rank <= 3 ? 'top3' : '';
+    const barPct = maxGanancia ? (w.ganancia / maxGanancia * 100) : 0;
+    const margenColor = w.margen >= 80 ? 'var(--green)' : w.margen >= 50 ? 'var(--amber)' : 'var(--red)';
+    return `<tr>
+      <td><span class="worker-rank ${rankClass}">${rank}</span></td>
+      <td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis" title="${w.nombre}">${w.nombre}</td>
+      <td style="color:var(--text2);font-size:11px">${w.ciudad}</td>
+      <td style="text-align:right">${fmt(w.servicios)}</td>
+      <td style="text-align:right;font-weight:700;color:var(--green)">$${fmt(w.ganancia)}</td>
+      <td style="text-align:right;color:var(--text2)">$${fmt(w.promedio)}</td>
+      <td style="text-align:right;color:var(--text3);font-size:11px">$${fmt(w.precio)}</td>
+      <td>
+        <div class="ganancia-bar">
+          <div class="ganancia-bar-inner" style="width:${Math.max(barPct,1).toFixed(1)}%;max-width:80px;background:var(--green);opacity:.7"></div>
+        </div>
+      </td>
+      <td style="text-align:right;font-weight:600;color:${margenColor}">${w.margen.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+
+  renderWorkerPagination(pages, total);
+}
+
+function renderWorkerPagination(pages, total) {
+  const el = document.getElementById('workerPaginationBtns');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  let btns = `<button class="page-btn" onclick="goWorkerPage(${workerPage-1})" ${workerPage===1?'disabled':''}>‹</button>`;
+  const range = [];
+  for (let i = Math.max(1, workerPage-2); i <= Math.min(pages, workerPage+2); i++) range.push(i);
+  if (range[0] > 1) btns += `<button class="page-btn" onclick="goWorkerPage(1)">1</button>`;
+  range.forEach(p => btns += `<button class="page-btn ${p===workerPage?'active':''}" onclick="goWorkerPage(${p})">${p}</button>`);
+  if (range[range.length-1] < pages) btns += `<button class="page-btn" onclick="goWorkerPage(${pages})">${pages}</button>`;
+  btns += `<button class="page-btn" onclick="goWorkerPage(${workerPage+1})" ${workerPage===pages?'disabled':''}>›</button>`;
+  el.innerHTML = btns;
+}
+
+function goWorkerPage(p) {
+  const pages = Math.ceil(workerFiltered.length / WORKER_PAGE_SIZE);
+  if (p < 1 || p > pages) return;
+  workerPage = p;
+  renderWorkerTable();
+}
+
+function exportWorkerCSV() {
+  if (!workerFiltered.length) return;
+  const headers = ['Trabajador','Ciudad Principal','Servicios','Ganancia Total','Promedio por Servicio','Ingreso Bruto','Margen %'];
+  const rows = [headers.join(','), ...workerFiltered.map(w =>
+    ['"'+w.nombre+'"', '"'+w.ciudad+'"', w.servicios, Math.round(w.ganancia), Math.round(w.promedio), Math.round(w.precio), w.margen.toFixed(2)].join(',')
+  )];
+  const blob = new Blob(['\ufeff' + rows.join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'GIF_HUB_Trabajadores_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+document.getElementById('searchWorker').addEventListener('keyup', () => { workerPage = 1; renderWorkerTable(); });
+
+loadData();
+</script>
+</body>
+</html>
